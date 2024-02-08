@@ -1,61 +1,40 @@
+import * as color from "./lib/colors";
+import { KwmRenderer } from "./modules/renderer";
 import "./style.css";
-import * as THREE from "three";
+import { handleKeyPress } from "./modules/keybinds";
+import { AtomType } from "./lib/atom";
+import * as three from "three";
 
-// Create a scene
-const scene: THREE.Scene = new THREE.Scene();
+// Setup renderer
+const kwm_renderer = new KwmRenderer()
+  .setupRenderer()
+  .setupScene()
+  .setupCamera()
+  .setupLights();
 
-// Create a camera
-const camera: THREE.PerspectiveCamera = new THREE.PerspectiveCamera(
-  75,
-  window.innerWidth / window.innerHeight,
-  0.1,
-  1000
-);
-camera.position.setZ(5);
+kwm_renderer.camera?.position.setZ(10);
 
-const renderer: THREE.WebGLRenderer = new THREE.WebGLRenderer();
-renderer.setSize(window.innerWidth, window.innerHeight);
-document.body.appendChild(renderer.domElement);
+// Create sphere
+/*
+const sphere = kwm_renderer.createSphere(0.4, color.Red);
+sphere.position.setY(1);
+const sphere2 = kwm_renderer.createSphere(0.2, color.Blue);
+sphere2.position.setY(2);
+const sphere3 = kwm_renderer.createSphere(0.2, color.Blue);
+sphere3.position.setY(0);
+*/
 
-setupLights()
+kwm_renderer.renderAtom({
+  atom_type: AtomType.Carbon,
+  connections: Array.of(),
+  electrons: 2,
+});
 
-const sphere: THREE.Mesh = createSphere(0.4);
-createSphere(0.4).position.setY(1)
+kwm_renderer.onUpdate = () => {
+  //sphere.rotateX(0.01).rotateY(0.01);
+};
 
-function createSphere(radius: number): THREE.Mesh {
-  const geometry: THREE.SphereGeometry = new THREE.SphereGeometry(radius);
-  const material: THREE.MeshStandardMaterial = new THREE.MeshStandardMaterial({
-    color: 0x00ff00,
-  });
-  const sphere = new THREE.Mesh(geometry, material);
-  scene.add(sphere);
-  return sphere
-}
+kwm_renderer.animate();
 
-function setupLights() {
-  const ambientLight: THREE.AmbientLight = new THREE.AmbientLight(0x404040);
-  const directionalLight: THREE.DirectionalLight = new THREE.DirectionalLight(
-    0xffffff,
-    1
-  );
-  directionalLight.position.set(5, 5, 5);
+document.addEventListener("keydown", handleKeyPress);
 
-  scene.add(directionalLight);
-
-  // Soft white light
-  scene.add(ambientLight);
-}
-
-// Animation function
-function animate() {
-  requestAnimationFrame(animate);
-
-  // Rotate the cube
-  sphere.rotation.x += 0.01;
-  sphere.rotation.y += 0.01;
-
-  renderer.render(scene, camera);
-}
-
-// Start the animation loop
-animate();

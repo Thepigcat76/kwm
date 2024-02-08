@@ -1,13 +1,13 @@
-type Atom = {
-  electrons: Array<Electron>;
+export interface Atom {
+  connections: Array<Atom>;
+  electrons: number,
   atom_type: AtomType;
 };
 
-type Electron = {
-  connections: Array<Atom>;
-};
-
-class AtomType {
+// Basically an enum but ts
+// does not have good enums
+// so we just go with this :p
+export class AtomType {
   static readonly Hydrogen = new AtomType("H", 1);
   static readonly Oxygen = new AtomType("O", 6);
   static readonly Nitrogen = new AtomType("N", 5);
