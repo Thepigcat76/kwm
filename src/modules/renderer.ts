@@ -83,69 +83,69 @@ export class KwmRenderer {
 
   // render the atoms
   renderAtom(atom: atom.Atom, pos: three.Vector3): three.Object3D {
-    const sphere = this.createSphere(1, colors.Red);
-    sphere.position.set(pos.x, pos.y, pos.z);
+    var main_electron;
 
-    const binding_electrons = atom.atom_type.getMaxElectrons() - atom.atom_type.getElectrons();
-
-    var electrons: Array<boolean> = Array.of();
-
-    for (let index = 0; index < binding_electrons; index++) {
-      electrons.push(true);
+    if (atom.atom_type.maxElectrons == 2) {
+      if (atom.atom_type.electrons == 1) {
+        main_electron = this.createSphere(1.5, colors.Blue);
+      } else {
+        main_electron = this.createSphere(1.5, colors.Red);
+      }
+    } else {
+      main_electron = this.createSphere(1.5, colors.Red);
     }
 
-    const not_binding = atom.atom_type.getElectrons() - binding_electrons;
+    main_electron.position.set(pos.x+2.5, pos.y, pos.z);
 
-    for (let index = 0; index < not_binding/2; index++) {
-      electrons.push(false);
-    }
+    const electrons = this.createElectrons(atom, pos);
 
-    const circle = this.createCircleOfSpheres(
-      new three.Vector3(pos.x, pos.y, pos.z),
-      1.75, electrons,
-      colors.Blue,
-      colors.Red
-    );
-
-    circle.add(sphere);
-    this.addToScene(circle);
-    return circle;
+    electrons.add(main_electron);
+    this.addToScene(electrons);
+    return electrons;
   }
 
-  createCircleOfSpheres(
-    center: THREE.Vector3,
-    radius: number,
-    canElectronBind: Array<boolean>,
-    colorBind: three.ColorRepresentation,
-    colorNotBind: three.ColorRepresentation,
-  ): THREE.Object3D {
-    const circle = new three.Object3D();
+  createElectrons(atom: atom.Atom, center: three.Vector3): three.Object3D {
+    const electrons = new three.Object3D();
 
-    for (let i = 0; i < canElectronBind.length; i++) {
-      const angle = (i / canElectronBind.length) * 2 * Math.PI;
-      const x = center.x + radius * Math.cos(angle);
-      const y = center.y + radius * Math.sin(angle);
+    var binding = atom.atom_type.maxElectrons - atom.atom_type.electrons;
 
-      var radius1;
-      if (canElectronBind[i]) {
-        radius1 = 1;
-      } else {
-        radius1 = 1.1;
-      } 
-
-      const sphereGeometry = new three.SphereGeometry(radius1, 16, 16);
-      var sphereMaterial;
-      if (canElectronBind[i]) {
-        sphereMaterial = new three.MeshStandardMaterial({ color: colorBind });
-      } else {
-        sphereMaterial = new three.MeshStandardMaterial({ color: colorNotBind });
-      }
-      const sphere = new three.Mesh(sphereGeometry, sphereMaterial);
-
-      sphere.position.set(x, y, center.z);
-      circle.add(sphere);
+    if (atom.atom_type.maxElectrons == 2) {
+      binding -= 1;
     }
 
-    return circle;
+    var not_binding = (atom.atom_type.electrons - binding) / 2;
+
+    if (atom.atom_type.maxElectrons == 2 && atom.atom_type.electrons < 2) {
+      not_binding = 0;
+    }
+
+    const bind_electrons = new Array(binding).fill(true);
+    const not_bind_electrons = new Array(not_binding).fill(false);
+    const electron_array = bind_electrons.concat(not_bind_electrons);
+
+    const relative_coords: Array<three.Vector3> = [
+      new three.Vector3(2.5, 2.25, 0),
+      new three.Vector3(0.5, -1.35, -0.8),
+      new three.Vector3(2.5, -1.35, 2),
+      new three.Vector3(4.5, -1.35, -0.8),
+    ];
+
+    for (let i = 0; i < electron_array.length; i++) {
+      const binds = electron_array[i];
+
+      var electron;
+      if (binds) {
+        electron = this.createSphere(1, colors.Blue);
+      } else {
+        electron = this.createSphere(1, colors.Red);
+      }
+
+      const coords = relative_coords[i];
+
+      electron.position.set(coords.x + center.x, coords.y + center.y, coords.z + center.z);
+
+      electrons.add(electron);
+    }
+    return electrons;
   }
 }

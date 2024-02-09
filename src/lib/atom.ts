@@ -17,17 +17,5 @@ export class AtomType {
   static readonly Flourine = new AtomType("F", 7);
   static readonly Phosphor = new AtomType("P", 5);
 
-  private constructor(private ident: string, private electrons: number, private maxElectrons: number = 8) {}
-
-  public getIdent(): string {
-    return this.ident;
-  }
-
-  public getElectrons(): number {
-    return this.electrons;
-  }
-
-  public getMaxElectrons(): number {
-    return this.maxElectrons;
-  }
+  private constructor(public readonly ident: string, public readonly electrons: number, public readonly maxElectrons: number = 8) {}
 }
