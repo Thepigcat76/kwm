@@ -1,11 +1,15 @@
 export enum Key {
-  Up = "ArrowUp",
-  Down = "ArrowDown",
-  Left = "ArrowLeft",
-  Right = "ArrowRight",
-  Space1 = "Space",
+  Up = "arrowup",
+  Down = "arrowdown",
+  Left = "arrowleft",
+  Right = "arrowright",
+  Space1 = "space",
   Space2 = " ",
-  Shift = "Shift",
+  Shift = "shift",
+  W = "w",
+  A = "a",
+  S = "s",
+  D = "d",
 }
 
 type Keymap = Map<Array<string>, () => void>;
@@ -30,8 +34,8 @@ export class KeyHandler {
 
   // Helper functions for key events
   handleKeyDown(event: KeyboardEvent) {
-    if (!this.pressedKeys.includes(event.key)) {
-      this.pressedKeys.push(event.key);
+    if (!this.pressedKeys.includes(event.key.toLowerCase())) {
+      this.pressedKeys.push(event.key.toLowerCase());
     }
 
     this.checkKeys();
@@ -39,7 +43,7 @@ export class KeyHandler {
 
   handleKeyUp(event: KeyboardEvent) {
     // Remove the released key from the array
-    const index = this.pressedKeys.indexOf(event.key);
+    const index = this.pressedKeys.indexOf(event.key.toLowerCase());
     if (index !== -1) {
       this.pressedKeys.splice(index, 1);
     }

@@ -1,7 +1,6 @@
 import * as three from "three";
 import * as atom from "../lib/atom";
 import * as colors from "../lib/colors";
-import { randInt } from "three/src/math/MathUtils.js";
 
 export class KwmRenderer {
   scene: three.Scene | undefined;
