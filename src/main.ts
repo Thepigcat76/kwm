@@ -12,29 +12,25 @@ const kwm_renderer = new KwmRenderer()
   .setupCamera()
   .setupLights();
 
-kwm_renderer.camera?.position.setZ(10);
+kwm_renderer.camera?.position.set(0, 2, 18);
 
-// Create sphere
-/*
-const sphere = kwm_renderer.createSphere(0.4, color.Red);
-sphere.position.setY(1);
-const sphere2 = kwm_renderer.createSphere(0.2, color.Blue);
-sphere2.position.setY(2);
-const sphere3 = kwm_renderer.createSphere(0.2, color.Blue);
-sphere3.position.setY(0);
-*/
-
-kwm_renderer.renderAtom({
+const carbon1 = kwm_renderer.renderAtom({
   atom_type: AtomType.Carbon,
   connections: Array.of(),
-  electrons: 2,
-});
+  charge: 0,
+}, new three.Vector3(0, 5, 0));
+
+const carbon2 = kwm_renderer.renderAtom({
+  atom_type: AtomType.Hydrogen,
+  connections: Array.of(),
+  charge: 0,
+}, new three.Vector3(0, 0, 0));
 
 kwm_renderer.onUpdate = () => {
-  //sphere.rotateX(0.01).rotateY(0.01);
+  carbon1.rotateX(0.02).rotateY(0.01).rotateZ(0.02);
+  carbon2.rotateX(0.02).rotateY(0.01).rotateZ(0.0);
 };
 
 kwm_renderer.animate();
 
 document.addEventListener("keydown", handleKeyPress);
-

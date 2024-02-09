@@ -84,12 +84,28 @@ export class KwmRenderer {
   }
 
   // render the atoms
-  renderAtom(atom: atom.Atom) {
+  renderAtom(atom: atom.Atom, pos: three.Vector3): three.Object3D {
     const sphere = this.createSphere(1, colors.Red);
-    sphere.position.setY(0);
+    sphere.position.set(pos.x, pos.y, pos.z);
 
-    const circle = this.createCircleOfSpheres(new three.Vector3(0, 0, 0), 1.75, Array.of(true), colors.Blue, colors.Red);
+    const binding_electrons = atom.atom_type.getMaxElectrons() - atom.atom_type.getElectrons();
+
+    var electrons: Array<boolean> = Array.of();
+
+    for (let index = 0; index < binding_electrons; index++) {
+      electrons.push(true);
+    }
+
+    const circle = this.createCircleOfSpheres(
+      new three.Vector3(pos.x, pos.y, pos.z),
+      1.75, electrons,
+      colors.Blue,
+      colors.Red
+    );
+
+    circle.add(sphere)
     this.addToScene(circle);
+    return circle;
   }
 
   createCircleOfSpheres(

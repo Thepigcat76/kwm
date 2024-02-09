@@ -1,6 +1,6 @@
 export interface Atom {
   connections: Array<Atom>;
-  electrons: number,
+  charge: number,
   atom_type: AtomType;
 };
 
@@ -13,13 +13,17 @@ export class AtomType {
   static readonly Nitrogen = new AtomType("N", 5);
   static readonly Carbon = new AtomType("C", 4);
 
-  private constructor(private ident: string, private electrons: number) {}
+  private constructor(private ident: string, private electrons: number, private maxElectrons: number) {}
 
-  public get getIdent(): string {
+  public getIdent(): string {
     return this.ident;
   }
 
-  public get getElectrons(): number {
+  public getElectrons(): number {
     return this.electrons;
+  }
+
+  public getMaxElectrons(): number {
+    return this.maxElectrons;
   }
 }
