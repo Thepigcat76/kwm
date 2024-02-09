@@ -1,28 +1,23 @@
-enum Key {
+export enum Key {
     Up = "ArrowUp",
     Down = "ArrowDown",
     Left = "ArrowLeft",
     Right = "ArrowRight",
 }
 
-export function handleKeyPress(event: KeyboardEvent): void {
-  switch (event.key) {
-    case Key.Up:
-      console.log("Up arrow key pressed");
-      break;
-    case Key.Down:
-      console.log("Down arrow key pressed");
-      break;
-    case Key.Left:
-      console.log("Left arrow key pressed");
-      break;
-    case Key.Right:
-      console.log("Right arrow key pressed");
-      break;
-    case "Enter":
-      console.log("Enter key pressed");
-      break;
-    default:
-      console.log(`Key pressed: ${event.key}`);
+export class KeyHandler {
+  private keys: Map<string, () => void> 
+  
+  constructor() {
+    this.keys = new Map();
+  }
+
+  createKeyMap(keys: Map<string, () => void>): this {
+    this.keys = keys;
+    return this;
+  }
+
+  handleKeyPress(event: KeyboardEvent): void {
+    this.keys.get(event.key)!()
   }
 }

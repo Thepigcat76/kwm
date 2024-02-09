@@ -1,6 +1,7 @@
 import * as three from "three";
 import * as atom from "../lib/atom";
 import * as colors from "../lib/colors";
+import { randInt } from "three/src/math/MathUtils.js";
 
 export class KwmRenderer {
   scene: three.Scene | undefined;
@@ -20,16 +21,14 @@ export class KwmRenderer {
     return this;
   }
 
-  setupCamera(): this {
+  setupCamera(pos: three.Vector3): this {
     this.camera = new three.PerspectiveCamera(
       75,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
     );
-    this.camera?.position.setX(0);
-    this.camera?.position.setZ(1);
-    this.camera?.position.setY(1);
+    this.camera?.position.set(pos.x, pos.y, pos.z);
     return this;
   }
 
@@ -96,6 +95,12 @@ export class KwmRenderer {
       electrons.push(true);
     }
 
+    const not_binding = atom.atom_type.getElectrons() - binding_electrons;
+
+    for (let index = 0; index < not_binding/2; index++) {
+      electrons.push(false);
+    }
+
     const circle = this.createCircleOfSpheres(
       new three.Vector3(pos.x, pos.y, pos.z),
       1.75, electrons,
@@ -103,7 +108,7 @@ export class KwmRenderer {
       colors.Red
     );
 
-    circle.add(sphere)
+    circle.add(sphere);
     this.addToScene(circle);
     return circle;
   }
@@ -122,7 +127,14 @@ export class KwmRenderer {
       const x = center.x + radius * Math.cos(angle);
       const y = center.y + radius * Math.sin(angle);
 
-      const sphereGeometry = new three.SphereGeometry(1, 16, 16);
+      var radius1;
+      if (canElectronBind[i]) {
+        radius1 = 1;
+      } else {
+        radius1 = 1.1;
+      } 
+
+      const sphereGeometry = new three.SphereGeometry(radius1, 16, 16);
       var sphereMaterial;
       if (canElectronBind[i]) {
         sphereMaterial = new three.MeshStandardMaterial({ color: colorBind });
@@ -131,7 +143,7 @@ export class KwmRenderer {
       }
       const sphere = new three.Mesh(sphereGeometry, sphereMaterial);
 
-      sphere.position.set(x, y, 0);
+      sphere.position.set(x, y, center.z);
       circle.add(sphere);
     }
 

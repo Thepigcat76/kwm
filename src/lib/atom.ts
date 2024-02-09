@@ -8,12 +8,16 @@ export interface Atom {
 // does not have good enums
 // so we just go with this :p
 export class AtomType {
-  static readonly Hydrogen = new AtomType("H", 1);
+  static readonly Hydrogen = new AtomType("H", 1, 2);
   static readonly Oxygen = new AtomType("O", 6);
   static readonly Nitrogen = new AtomType("N", 5);
   static readonly Carbon = new AtomType("C", 4);
+  static readonly Chlorine = new AtomType("Cl", 7);
+  static readonly Sulphur = new AtomType("S", 6);
+  static readonly Flourine = new AtomType("F", 7);
+  static readonly Phosphor = new AtomType("P", 5);
 
-  private constructor(private ident: string, private electrons: number, private maxElectrons: number) {}
+  private constructor(private ident: string, private electrons: number, private maxElectrons: number = 8) {}
 
   public getIdent(): string {
     return this.ident;
