@@ -6,6 +6,8 @@ export class KwmRenderer {
   scene: three.Scene | undefined;
   camera: three.PerspectiveCamera | undefined;
   renderer: three.WebGLRenderer | undefined;
+  raycaster: three.Raycaster | undefined;
+  atoms: Array<atom.Atom> = [];
 
   onUpdate: () => void;
 
@@ -51,6 +53,11 @@ export class KwmRenderer {
     return this;
   }
 
+  setupRaycaster(): this {
+    this.raycaster = new three.Raycaster()
+    return this;
+  }
+
   // Add object to the scene
   addToScene(...object: three.Object3D[]): this {
     for (var x = 0; x < object.length; x++) {
@@ -82,7 +89,7 @@ export class KwmRenderer {
   }
 
   // render the atoms
-  renderAtom(atom: atom.Atom, pos: three.Vector3): three.Object3D {
+  createAtom(atom: atom.Atom): three.Object3D {
     var main_electron;
 
     if (atom.atom_type.maxElectrons == 2) {
@@ -95,12 +102,13 @@ export class KwmRenderer {
       main_electron = this.createSphere(1.5, colors.Red);
     }
 
-    main_electron.position.set(pos.x+2.5, pos.y, pos.z);
+    main_electron.position.set(atom.pos.x+2.5, atom.pos.y, atom.pos.z);
 
-    const electrons = this.createElectrons(atom, pos);
+    const electrons = this.createElectrons(atom, atom.pos);
 
     electrons.add(main_electron);
     this.addToScene(electrons);
+    this.atoms.push(atom);
     return electrons;
   }
 

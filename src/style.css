@@ -2,8 +2,9 @@ canvas {
   position: fixed;
   top: 0;
   left: 0;
+  z-index: -1;
 }
 
-button {
-  z-index: 100;
+.addDropdown {
+  z-index: 1;
 }
