@@ -8,6 +8,7 @@ export class KwmRenderer {
   renderer: three.WebGLRenderer | undefined;
   raycaster: three.Raycaster | undefined;
   atoms: Array<atom.Atom> = [];
+  atom_objects: Array<three.Object3D> = [];
 
   onUpdate: () => void;
 
@@ -54,7 +55,7 @@ export class KwmRenderer {
   }
 
   setupRaycaster(): this {
-    this.raycaster = new three.Raycaster()
+    this.raycaster = new three.Raycaster();
     return this;
   }
 
@@ -62,6 +63,13 @@ export class KwmRenderer {
   addToScene(...object: three.Object3D[]): this {
     for (var x = 0; x < object.length; x++) {
       this.scene?.add(object[x]);
+    }
+    return this;
+  }
+
+  hideFromScene(...object: three.Object3D[]): this {
+    for (var x = 0; x < object.length; x++) {
+      this.scene?.remove(object[x]);
     }
     return this;
   }
@@ -102,13 +110,14 @@ export class KwmRenderer {
       main_electron = this.createSphere(1.5, colors.Red);
     }
 
-    main_electron.position.set(atom.pos.x+2.5, atom.pos.y, atom.pos.z);
+    main_electron.position.set(atom.pos.x + 2.5, atom.pos.y, atom.pos.z);
 
     const electrons = this.createElectrons(atom, atom.pos);
 
     electrons.add(main_electron);
     this.addToScene(electrons);
     this.atoms.push(atom);
+    this.atom_objects.push(electrons);
     return electrons;
   }
 
@@ -150,7 +159,11 @@ export class KwmRenderer {
 
       const coords = relative_coords[i];
 
-      electron.position.set(coords.x + center.x, coords.y + center.y, coords.z + center.z);
+      electron.position.set(
+        coords.x + center.x,
+        coords.y + center.y,
+        coords.z + center.z
+      );
 
       electrons.add(electron);
     }

@@ -3,7 +3,11 @@ import "./style.css";
 import { AtomType } from "./lib/atom";
 import * as three from "three";
 import { Key, KeyHandler } from "./modules/keybinds";
-import { atomsToString } from "./util";
+import { atomsToString } from "./util/util";
+import { AtomHandler } from "./modules/atom_handler";
+import { LineGeometry } from "three/examples/jsm/Addons.js";
+import { Red } from "./lib/colors";
+import { AtomHelper } from "./util/atom_helper";
 
 main();
 
@@ -16,8 +20,12 @@ function main() {
     .setupLights()
     .setupRaycaster();
 
+  const atom_helper = new AtomHelper(kwm_renderer);
+
+  const atom_handler = new AtomHandler(kwm_renderer, atom_helper).setupMouseEvent();
+
   const carbon3 = kwm_renderer.createAtom({
-    atom_type: AtomType.Carbon,
+    atom_type: AtomType.Hydrogen,
     charge: 0,
     connections: Array.of(),
 
@@ -62,24 +70,4 @@ function main() {
     kwm_renderer.camera!.updateProjectionMatrix();
     kwm_renderer.renderer!.setSize(window.innerWidth, window.innerHeight);
   });
-
-  window.addEventListener("click", (event) => onClick(event, kwm_renderer, carbon3));
-}
-
-function onClick(event: MouseEvent, kwm_renderer: KwmRenderer, intersections: three.Object3D) {
-  const mouse = new three.Vector2();
-  // Calculate normalized device coordinates (-1 to +1) for the mouse position
-  mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-  mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
-
-  // Update the picking ray with the camera and mouse position
-  kwm_renderer.raycaster!.setFromCamera(mouse, kwm_renderer.camera!);
-
-  // Check for intersections with the sphere
-  const intersects = kwm_renderer.raycaster!.intersectObject(intersections);
-
-  if (intersects.length > 0) {
-    console.log("Sphere clicked!");
-    // Perform actions when the sphere is clicked
-  }
 }

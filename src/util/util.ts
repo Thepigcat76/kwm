@@ -1,5 +1,9 @@
 import { Vector3 } from "three";
-import { Atom } from "./lib/atom";
+import { Atom } from "../lib/atom";
+
+export enum GeometryAttributes {
+  Pos = "position"
+}
 
 export function atomsToString(atoms: Array<Atom>): string {
   let content: string[] = ["["];
