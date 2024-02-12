@@ -2,7 +2,6 @@ import * as three from "three";
 import { KwmRenderer } from "./renderer";
 import { Red } from "../lib/colors";
 import { AtomHelper } from "../util/atom_helper";
-import { PVRLoader } from "three/examples/jsm/Addons.js";
 
 export class AtomHandler {
   private show_line: boolean = false;
@@ -18,13 +17,7 @@ export class AtomHandler {
       new three.Vector3(1, 0, 0)
     );
   }
-
-  setupMouseEvent() {
-    window.addEventListener("click", (event) =>
-      this.onClick(event, this.kwm_renderer)
-    );
-  }
-
+  
   onClick(event: MouseEvent, kwm_renderer: KwmRenderer) {
     const mouse = new three.Vector2();
     // Calculate normalized device coordinates (-1 to +1) for the mouse position
@@ -45,7 +38,7 @@ export class AtomHandler {
 
     if (intersects!.length > 0) {
       this.show_line = !this.show_line;
-      this.atom_helper.setLineVisible(this.line, !this.show_line)
+      this.atom_helper.setLineVisible(this.line, !this.show_line);
     }
   }
 }
