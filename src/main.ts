@@ -41,18 +41,6 @@ function main() {
       (event) => atom_handler.onClick(event, kwm_renderer)
     );
 
-  const composer = new EffectComposer(kwm_renderer.renderer!);
-  const renderPass = new RenderPass(kwm_renderer.scene!, kwm_renderer.camera!);
-  composer.addPass(renderPass);
-
-  const outlinePass = new OutlinePass(
-    new three.Vector2(window.innerWidth, window.innerHeight),
-    kwm_renderer.scene!,
-    kwm_renderer.camera!
-  );
-
-  composer.addPass(outlinePass);
-
   const carbon3 = atom_helper.createAtom({
     atom_type: AtomType.Oxygen,
     charge: 0,
@@ -63,7 +51,12 @@ function main() {
     charge: 0,
   });
 
-  outlinePass.selectedObjects = [carbon4.object, carbon4.main_electron];
+  const composer = setupComposer(
+    kwm_renderer.renderer!,
+    kwm_renderer.scene!,
+    kwm_renderer.camera!,
+    carbon4.object
+  );
 
   const controls = new OrbitControls(
     kwm_renderer.camera!,
@@ -106,4 +99,34 @@ function main() {
     kwm_renderer.camera!.updateProjectionMatrix();
     kwm_renderer.renderer!.setSize(window.innerWidth, window.innerHeight);
   });
+}
+
+function setupComposer(
+  renderer: three.WebGLRenderer,
+  scene: three.Scene,
+  camera: three.Camera,
+  obj: three.Object3D
+): EffectComposer {
+  const composer = new EffectComposer(renderer);
+  const renderPass = new RenderPass(scene, camera);
+  composer.addPass(renderPass);
+
+  const outlinePass = new OutlinePass(
+    new three.Vector2(window.innerWidth, window.innerHeight),
+    scene,
+    camera
+  );
+  composer.addPass(outlinePass);
+
+  outlinePass.edgeStrength = 4;
+  outlinePass.edgeThickness = 1;
+  outlinePass.pulsePeriod = 0;
+  outlinePass.visibleEdgeColor.set("#ffffff");
+  outlinePass.hiddenEdgeColor.set("#ffffff");
+  outlinePass.usePatternTexture = false;
+
+  // Enable the outline effect for the cube
+  outlinePass.selectedObjects = [obj];
+
+  return composer;
 }

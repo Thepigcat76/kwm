@@ -42,14 +42,16 @@ export class KwmRenderer {
 
   // Setup lights
   setupLights(): this {
-    const ambientLight: three.AmbientLight = new three.AmbientLight(0x404040);
+    const ambientLight: three.AmbientLight = new three.AmbientLight(
+      0xffffff,
+      1.2
+    );
     const directionalLight: three.DirectionalLight = new three.DirectionalLight(
       0xffffff,
-      1
+      2.3
     );
     directionalLight.position.set(5, 5, 5);
-
-    this.addToScene(directionalLight).addToScene(ambientLight);
+    this.addToScene(ambientLight).addToScene(directionalLight);
     return this;
   }
 
