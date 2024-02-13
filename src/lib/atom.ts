@@ -1,11 +1,17 @@
-import { Vector3 } from "three";
+import { Mesh, Object3D } from "three";
 
 export interface Atom {
-  connections: Array<Atom>;
   charge: number;
   atom_type: AtomType;
+}
 
-  pos: Vector3;
+export interface AtomObject {
+  object: Object3D;
+  main_electron: Mesh;
+  electron_spheres: Array<Mesh>;
+  connections: Array<AtomObject>;
+
+  atom: Atom;
 }
 
 // Basically an enum but ts
@@ -51,7 +57,8 @@ export class AtomType {
 
   private toRawString(atom_name: string): string {
     return (
-      atom_name+": { symbol: " +
+      atom_name +
+      ": { symbol: " +
       this.ident +
       ", electrons: " +
       this.electrons +

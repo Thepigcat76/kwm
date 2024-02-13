@@ -2,16 +2,18 @@ import { KwmRenderer } from "./modules/renderer";
 import "./style.css";
 import { AtomType } from "./lib/atom";
 import * as three from "three";
-import { Key, KeyHandler } from "./modules/keybinds";
 import { atomsToString } from "./util/util";
 import { AtomHandler } from "./modules/atom_handler";
-import {
-  FirstPersonControls,
-  LineGeometry,
-} from "three/examples/jsm/Addons.js";
-import { Red } from "./lib/colors";
 import { AtomHelper } from "./util/atom_helper";
+import { Key, KeyHandler } from "./modules/keybinds";
 import { MouseHelper } from "./util/mouse_helper";
+import { RenderHelper } from "./util/render_helper";
+import {
+  EffectComposer,
+  OrbitControls,
+  OutlinePass,
+  RenderPass,
+} from "three/examples/jsm/Addons.js";
 
 main();
 
@@ -24,11 +26,12 @@ function main() {
     .setupLights()
     .setupRaycaster();
 
-  const atom_helper = new AtomHelper(kwm_renderer);
+  const render_helper = new RenderHelper(kwm_renderer);
 
-  const atom_handler = new AtomHandler(kwm_renderer, atom_helper);
+  const atom_helper = new AtomHelper(kwm_renderer, render_helper);
 
-  /*
+  const atom_handler = new AtomHandler(atom_helper);
+
   const mouse_helper = new MouseHelper(kwm_renderer)
     .setupMouseListener()
     .setupActions(
@@ -37,45 +40,52 @@ function main() {
       },
       (event) => atom_handler.onClick(event, kwm_renderer)
     );
-  */
 
-  const controls = new FirstPersonControls(
-    kwm_renderer.camera!,
-    kwm_renderer.renderer?.domElement
+  const composer = new EffectComposer(kwm_renderer.renderer!);
+  const renderPass = new RenderPass(kwm_renderer.scene!, kwm_renderer.camera!);
+  composer.addPass(renderPass);
+
+  const outlinePass = new OutlinePass(
+    new three.Vector2(window.innerWidth, window.innerHeight),
+    kwm_renderer.scene!,
+    kwm_renderer.camera!
   );
-  controls.movementSpeed = 10;
-  controls.lookSpeed = 0.1;
 
-  const carbon3 = kwm_renderer.createAtom({
-    atom_type: AtomType.Hydrogen,
+  composer.addPass(outlinePass);
+
+  const carbon3 = atom_helper.createAtom({
+    atom_type: AtomType.Oxygen,
     charge: 0,
-    connections: Array.of(),
-
-    pos: new three.Vector3(-5, 0, 0),
   });
 
-  const carbon4 = kwm_renderer.createAtom({
+  const carbon4 = atom_helper.createAtom({
     atom_type: AtomType.Carbon,
     charge: 0,
-    connections: Array.of(),
-
-    pos: new three.Vector3(-5, -9, 0),
   });
 
+  outlinePass.selectedObjects = [carbon4.object, carbon4.main_electron];
+
+  const controls = new OrbitControls(
+    kwm_renderer.camera!,
+    kwm_renderer.renderer!.domElement
+  );
+  controls.enableDamping = true; // an animation loop is required when damping is enabled
+  controls.dampingFactor = 0.25;
+
   kwm_renderer.onUpdate = () => {
-    controls.update(new three.Clock().getDelta());
+    controls.update();
+    composer.render();
   };
 
   kwm_renderer.animate();
 
-  /*
   new KeyHandler()
     .createKeyMap(
       new Map()
-        .set(
-          [Key.Space1, Key.Space2, Key.Up],
-          () => (kwm_renderer.camera!.position.y += 0.3)
-        )
+        .set([Key.Space1, Key.Space2, Key.Up], () => {
+          kwm_renderer.camera!.position.y += 0.3;
+          atom_helper.selectAtoms(carbon3);
+        })
         .set(
           [Key.Shift, Key.Down],
           () => (kwm_renderer.camera!.position.y -= 0.3)
@@ -88,8 +98,6 @@ function main() {
         .set([Key.Right], () => (kwm_renderer.camera!.rotation.y += 0.01))
     )
     .setupKeyListeners();
-
-  */
 
   console.log("Atoms: " + atomsToString(kwm_renderer.atoms));
 
