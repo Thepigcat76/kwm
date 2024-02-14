@@ -8,6 +8,7 @@ export class KwmRenderer {
   renderer: three.WebGLRenderer | undefined;
   raycaster: three.Raycaster | undefined;
   atoms: Array<atom.AtomObject> = [];
+  composer: EffectComposer | undefined;
 
   onUpdate: () => void;
 
@@ -40,7 +41,6 @@ export class KwmRenderer {
     return this;
   }
 
-  // Setup lights
   setupLights(): this {
     const ambientLight: three.AmbientLight = new three.AmbientLight(
       0xffffff,
@@ -57,6 +57,11 @@ export class KwmRenderer {
 
   setupRaycaster(): this {
     this.raycaster = new three.Raycaster();
+    return this;
+  }
+
+  setupComposer(): this {
+    this.composer = new EffectComposer(this.renderer!);
     return this;
   }
 

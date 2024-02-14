@@ -2,18 +2,13 @@ import { KwmRenderer } from "./modules/renderer";
 import "./style.css";
 import { AtomType } from "./lib/atom";
 import * as three from "three";
-import { atomsToString } from "./util/util";
+import { atomsToString, getAtomPos, setupOutlinePass } from "./util/util";
 import { AtomHandler } from "./modules/atom_handler";
 import { AtomHelper } from "./util/atom_helper";
 import { Key, KeyHandler } from "./modules/keybinds";
 import { MouseHelper } from "./util/mouse_helper";
 import { RenderHelper } from "./util/render_helper";
-import {
-  EffectComposer,
-  OrbitControls,
-  OutlinePass,
-  RenderPass,
-} from "three/examples/jsm/Addons.js";
+import { OrbitControls, RenderPass } from "three/examples/jsm/Addons.js";
 
 main();
 
@@ -24,13 +19,20 @@ function main() {
     .setupScene()
     .setupCamera(new three.Vector3(0, 2, 18))
     .setupLights()
-    .setupRaycaster();
+    .setupRaycaster()
+    .setupComposer();
 
   const render_helper = new RenderHelper(kwm_renderer);
 
   const atom_helper = new AtomHelper(kwm_renderer, render_helper);
 
-  const atom_handler = new AtomHandler(atom_helper);
+  const renderPass = new RenderPass(kwm_renderer.scene!, kwm_renderer.camera!);
+  kwm_renderer.composer!.addPass(renderPass);
+
+  const outlinePass = setupOutlinePass(kwm_renderer);
+  kwm_renderer.composer!.addPass(outlinePass);
+
+  const atom_handler = new AtomHandler(atom_helper, outlinePass);
 
   const mouse_helper = new MouseHelper(kwm_renderer)
     .setupMouseListener()
@@ -51,12 +53,7 @@ function main() {
     charge: 0,
   });
 
-  const composer = setupComposer(
-    kwm_renderer.renderer!,
-    kwm_renderer.scene!,
-    kwm_renderer.camera!,
-    carbon4.object
-  );
+  getAtomPos(carbon3).x = 10
 
   const controls = new OrbitControls(
     kwm_renderer.camera!,
@@ -67,7 +64,7 @@ function main() {
 
   kwm_renderer.onUpdate = () => {
     controls.update();
-    composer.render();
+    kwm_renderer.composer!.render();
   };
 
   kwm_renderer.animate();
@@ -99,34 +96,4 @@ function main() {
     kwm_renderer.camera!.updateProjectionMatrix();
     kwm_renderer.renderer!.setSize(window.innerWidth, window.innerHeight);
   });
-}
-
-function setupComposer(
-  renderer: three.WebGLRenderer,
-  scene: three.Scene,
-  camera: three.Camera,
-  obj: three.Object3D
-): EffectComposer {
-  const composer = new EffectComposer(renderer);
-  const renderPass = new RenderPass(scene, camera);
-  composer.addPass(renderPass);
-
-  const outlinePass = new OutlinePass(
-    new three.Vector2(window.innerWidth, window.innerHeight),
-    scene,
-    camera
-  );
-  composer.addPass(outlinePass);
-
-  outlinePass.edgeStrength = 4;
-  outlinePass.edgeThickness = 1;
-  outlinePass.pulsePeriod = 0;
-  outlinePass.visibleEdgeColor.set("#ffffff");
-  outlinePass.hiddenEdgeColor.set("#ffffff");
-  outlinePass.usePatternTexture = false;
-
-  // Enable the outline effect for the cube
-  outlinePass.selectedObjects = [obj];
-
-  return composer;
 }

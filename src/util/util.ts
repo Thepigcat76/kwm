@@ -1,5 +1,7 @@
 import { Vector2, Vector3 } from "three";
 import { AtomObject } from "../lib/atom";
+import { OutlinePass } from "three/examples/jsm/Addons.js";
+import { KwmRenderer } from "../modules/renderer";
 
 export enum GeometryAttributes {
   Pos = "position",
@@ -71,11 +73,28 @@ function findNearestVector2(
 
 export function mouseToThreePos(mouse_pos: Vector2): Vector2 {
   return new Vector2(
-    (mouse_pos.y / window.innerWidth) * 2 - 1,
+    (mouse_pos.x / window.innerWidth) * 2 - 1,
     -(mouse_pos.y / window.innerHeight) * 2 + 1
   );
 }
 
 export function getAtomPos(atom_obj: AtomObject): Vector3 {
   return atom_obj.object.position;
+}
+
+export function setupOutlinePass(renderer: KwmRenderer) {
+  const outlinePass = new OutlinePass(
+    new Vector2(window.innerWidth, window.innerHeight),
+    renderer.scene!,
+    renderer.camera!
+  );
+
+  outlinePass.edgeStrength = 4;
+  outlinePass.edgeThickness = 1;
+  outlinePass.pulsePeriod = 0;
+  outlinePass.visibleEdgeColor.set("#ffffff");
+  outlinePass.hiddenEdgeColor.set("#ffffff");
+  outlinePass.usePatternTexture = false;
+
+  return outlinePass;
 }
