@@ -1,7 +1,7 @@
 import { KwmRenderer } from "../modules/renderer";
 import * as three from "three";
 import { mouseToThreePos } from "./util";
-import { OutlinePass } from "three/examples/jsm/Addons.js";
+import { TransformControls } from "three/examples/jsm/Addons.js";
 
 type MouseAction = (event: MouseEvent) => void;
 
@@ -10,16 +10,10 @@ export class MouseHelper {
 
   private moveAction: MouseAction;
   private clickedAction: MouseAction;
-  private renderer: KwmRenderer;
-  private camera: three.Camera;
-  private prev_mouse_pos: three.Vector2 | undefined;
 
-  constructor(renderer: KwmRenderer, private outlinePass: OutlinePass) {
+  constructor() {
     this.moveAction = () => {};
     this.clickedAction = () => {};
-    this.renderer = renderer;
-    this.camera = this.renderer.camera!;
-    this.prev_mouse_pos = undefined;
   }
 
   setupMouseListener(): this {
@@ -65,6 +59,7 @@ export class MouseHelper {
 
     var intersects = undefined;
     var intersecting_obj = undefined;
+    if (kwm_renderer.atoms.length <= 0) return;
     for (let i = 0; i < kwm_renderer.atoms.length; i++) {
       intersects = kwm_renderer.raycaster!.intersectObject(
         kwm_renderer.atoms[i].object
@@ -75,23 +70,10 @@ export class MouseHelper {
     }
 
     if (intersects!.length > 0) {
-      if (
-        !this.outlinePass.selectedObjects.includes(intersecting_obj!.object)
-      ) {
-        this.outlinePass.selectedObjects.push(intersecting_obj!.object);
-        intersecting_obj!.selected = true;
-      }
-    } else {
-        intersecting_obj!.selected = false;
-      const indexToRemove = this.outlinePass.selectedObjects.indexOf(
-        intersecting_obj?.object!
-      );
-      this.outlinePass.selectedObjects.splice(indexToRemove, 1);
-      this.outlinePass.selectedObjects;
     }
   }
 
-  clickMouse(event: MouseEvent, kwm_renderer: KwmRenderer) {
+  clickMouse(event: MouseEvent, kwm_renderer: KwmRenderer, transforms: TransformControls) {
     const mouse = mouseToThreePos(
       new three.Vector2(event.clientX, event.clientY)
     );
@@ -113,6 +95,9 @@ export class MouseHelper {
     console.log(intersects);
 
     if (intersects!.length > 0) {
+      transforms.attach(intersecting_obj!.object)
+    } else {
+      transforms.detach();
     }
   }
 }

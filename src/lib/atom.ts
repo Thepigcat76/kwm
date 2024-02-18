@@ -10,7 +10,8 @@ export interface AtomObject {
   main_electron: Mesh;
   electron_spheres: Array<Mesh>;
   connections: Array<AtomObject>;
-  selected: boolean,
+  selected: boolean;
+  index: number;
 
   atom: Atom;
 }

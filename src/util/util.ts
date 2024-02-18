@@ -1,4 +1,4 @@
-import { Vector2, Vector3 } from "three";
+import { Mesh, MeshStandardMaterial, Object3D, Vector2, Vector3 } from "three";
 import { AtomObject } from "../lib/atom";
 import { OutlinePass } from "three/examples/jsm/Addons.js";
 import { KwmRenderer } from "../modules/renderer";
@@ -97,4 +97,13 @@ export function setupOutlinePass(renderer: KwmRenderer) {
   outlinePass.usePatternTexture = false;
 
   return outlinePass;
+}
+
+export function removeFromArray<T>(array: T[], index: number) {
+  const newArr = array.splice(index, 1);
+  array = newArr;
+}
+
+export function getMaterial(mesh: Mesh) {
+  return mesh.material as MeshStandardMaterial;
 }

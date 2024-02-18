@@ -2,16 +2,18 @@ import { KwmRenderer } from "./modules/renderer";
 import "./style.css";
 import { AtomType } from "./lib/atom";
 import * as three from "three";
-import { atomsToString, getAtomPos, setupOutlinePass } from "./util/util";
+import { atomsToString, getAtomPos, getMaterial, removeFromArray, setupOutlinePass } from "./util/util";
 import { AtomHelper } from "./util/atom_helper";
-import { KeyHandler } from "./modules/keybinds";
 import { MouseHelper } from "./util/mouse_helper";
 import { RenderHelper } from "./util/render_helper";
 import {
+  ArcballControls,
   OrbitControls,
   RenderPass,
   TransformControls,
 } from "three/examples/jsm/Addons.js";
+import { Red } from "./lib/colors";
+import { Key, KeyHandler } from "./modules/keybinds";
 
 main();
 
@@ -30,7 +32,7 @@ function main() {
     kwm_renderer.renderer!.domElement
   );
   controls.minDistance = 5;
-  controls.maxDistance = 30;
+  controls.maxDistance = 60;
   controls.enableDamping = true;
   controls.dampingFactor = 0.25;
 
@@ -38,15 +40,16 @@ function main() {
     kwm_renderer.camera!,
     kwm_renderer.renderer?.domElement
   );
-  transforms.addEventListener("objectChange", function () {
-    transforms.scale.set(1, 1, 1)    
-  })
 
-  transforms.addEventListener("change", () => kwm_renderer.renderer?.render(kwm_renderer.scene!, kwm_renderer.camera!));
+  transforms.addEventListener("change", () =>
+    kwm_renderer.renderer?.render(kwm_renderer.scene!, kwm_renderer.camera!)
+  );
 
   transforms.addEventListener("dragging-changed", function (event) {
     controls.enabled = !event.value;
   });
+
+  new KeyHandler().createKeyMap(new Map().set([Key.R], () => transforms.setMode("rotate")).set([Key.P], () => transforms.setMode("translate"))).setupKeyListeners()
 
   const render_helper = new RenderHelper(kwm_renderer);
 
@@ -58,29 +61,49 @@ function main() {
   const outlinePass = setupOutlinePass(kwm_renderer);
   kwm_renderer.composer!.addPass(outlinePass);
 
-  const mouse_helper = new MouseHelper(kwm_renderer, outlinePass)
-    .setupMouseListener()
-    .setupActions(
-      (event) => {
-        mouse_helper.moveMouse(event, kwm_renderer);
-      },
-      (event) => mouse_helper.clickMouse(event, kwm_renderer)
-    );
+  const mouse_helper = new MouseHelper().setupMouseListener().setupActions(
+    (event) => {
+      mouse_helper.moveMouse(event, kwm_renderer);
+    },
+    (event) => mouse_helper.clickMouse(event, kwm_renderer, transforms)
+  );
+
+  const parent = new three.Object3D();
 
   const carbon3 = atom_helper.createAtom({
-    atom_type: AtomType.Oxygen,
+    atom_type: AtomType.Chlorine,
     charge: 0,
   });
 
   const carbon4 = atom_helper.createAtom({
-    atom_type: AtomType.Carbon,
+    atom_type: AtomType.Chlorine,
     charge: 0,
   });
 
-  transforms.attach(carbon4.object);
-  kwm_renderer.addToScene(transforms)
+  const carbon5 = atom_helper.createAtom({
+    atom_type: AtomType.Sulphur,
+    charge: 0,
+  });
 
-  getAtomPos(carbon3).x = 10;
+  getMaterial(carbon3.electron_spheres[0]).color.set(Red)
+  getMaterial(carbon4.electron_spheres[0]).color.set(Red);
+  getMaterial(carbon5.electron_spheres[0]).color.set(Red);
+
+  carbon3.object.rotateX(Math.PI / 2);
+  carbon3.object.rotateZ(Math.PI / 2);
+
+  carbon4.object.rotateX(Math.PI / 2);
+  carbon4.object.rotateZ(-(Math.PI / 2));
+
+  carbon5.object.rotateX(Math.PI / 2);
+  carbon5.object.rotateZ(-(Math.PI / 2));
+
+  carbon3.object.position.x = -5.5;
+
+  kwm_renderer.addToScene(transforms);
+
+  getAtomPos(carbon3).x += 10;
+  getAtomPos(carbon4).x += 20;
 
   kwm_renderer.onUpdate = () => {
     controls.update();
@@ -89,7 +112,9 @@ function main() {
 
   kwm_renderer.animate();
 
-  console.log("Atoms: " + atomsToString(kwm_renderer.atoms));
+  const gridHelper = new three.GridHelper(30, 25, 0xbfbfbf, 0x757575);
+  gridHelper.position.setY(-3);
+  kwm_renderer.addToScene(gridHelper);
 
   window.addEventListener("resize", () => {
     kwm_renderer.camera!.aspect = window.innerWidth / window.innerHeight;

@@ -74,6 +74,7 @@ export class AtomHelper {
     atom_obj.main_electron = main_electron;
 
     atom_obj.object.add(main_electron);
+    atom_obj.index = this.kwm_render.atoms.length
     this.kwm_render.atoms.push(atom_obj);
     this.kwm_render.addToScene(atom_obj.object);
     return atom_obj;
@@ -86,7 +87,8 @@ export class AtomHelper {
       electron_spheres: [],
       connections: [],
       atom: atom,
-      selected: false
+      selected: false,
+      index: 0,
     };
 
     var binding = atom.atom_type.maxElectrons - atom.atom_type.electrons;

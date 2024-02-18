@@ -10,6 +10,8 @@ export enum Key {
   A = "a",
   S = "s",
   D = "d",
+  R = "r",
+  P = "p",
 }
 
 type Keymap = Map<Array<string>, () => void>;

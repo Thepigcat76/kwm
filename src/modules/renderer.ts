@@ -82,7 +82,7 @@ export class KwmRenderer {
 
   // Update the scene regularly and execute code
   animate() {
-    requestAnimationFrame(this.animate);
+    requestAnimationFrame(() => this.animate());
 
     this.onUpdate();
   }
