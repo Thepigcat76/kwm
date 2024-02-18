@@ -81,7 +81,12 @@ function main() {
   });
 
   const carbon5 = atom_helper.createAtom({
-    atom_type: AtomType.Sulphur,
+    atom_type: AtomType.Chlorine,
+    charge: 0,
+  });
+
+  const carbon6 = atom_helper.createAtom({
+    atom_type: AtomType.Nitrogen,
     charge: 0,
   });
 
