@@ -3,12 +3,15 @@ import "./style.css";
 import { AtomType } from "./lib/atom";
 import * as three from "three";
 import { atomsToString, getAtomPos, setupOutlinePass } from "./util/util";
-import { AtomHandler } from "./modules/atom_handler";
 import { AtomHelper } from "./util/atom_helper";
-import { Key, KeyHandler } from "./modules/keybinds";
+import { KeyHandler } from "./modules/keybinds";
 import { MouseHelper } from "./util/mouse_helper";
 import { RenderHelper } from "./util/render_helper";
-import { OrbitControls, RenderPass } from "three/examples/jsm/Addons.js";
+import {
+  OrbitControls,
+  RenderPass,
+  TransformControls,
+} from "three/examples/jsm/Addons.js";
 
 main();
 
@@ -22,6 +25,29 @@ function main() {
     .setupRaycaster()
     .setupComposer();
 
+  const controls = new OrbitControls(
+    kwm_renderer.camera!,
+    kwm_renderer.renderer!.domElement
+  );
+  controls.minDistance = 5;
+  controls.maxDistance = 30;
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.25;
+
+  const transforms = new TransformControls(
+    kwm_renderer.camera!,
+    kwm_renderer.renderer?.domElement
+  );
+  transforms.addEventListener("objectChange", function () {
+    transforms.scale.set(1, 1, 1)    
+  })
+
+  transforms.addEventListener("change", () => kwm_renderer.renderer?.render(kwm_renderer.scene!, kwm_renderer.camera!));
+
+  transforms.addEventListener("dragging-changed", function (event) {
+    controls.enabled = !event.value;
+  });
+
   const render_helper = new RenderHelper(kwm_renderer);
 
   const atom_helper = new AtomHelper(kwm_renderer, render_helper);
@@ -32,15 +58,13 @@ function main() {
   const outlinePass = setupOutlinePass(kwm_renderer);
   kwm_renderer.composer!.addPass(outlinePass);
 
-  const atom_handler = new AtomHandler(atom_helper, outlinePass);
-
-  const mouse_helper = new MouseHelper(kwm_renderer)
+  const mouse_helper = new MouseHelper(kwm_renderer, outlinePass)
     .setupMouseListener()
     .setupActions(
       (event) => {
-        mouse_helper.moveCamera(event);
+        mouse_helper.moveMouse(event, kwm_renderer);
       },
-      (event) => atom_handler.onClick(event, kwm_renderer)
+      (event) => mouse_helper.clickMouse(event, kwm_renderer)
     );
 
   const carbon3 = atom_helper.createAtom({
@@ -53,14 +77,10 @@ function main() {
     charge: 0,
   });
 
-  getAtomPos(carbon3).x = 10
+  transforms.attach(carbon4.object);
+  kwm_renderer.addToScene(transforms)
 
-  const controls = new OrbitControls(
-    kwm_renderer.camera!,
-    kwm_renderer.renderer!.domElement
-  );
-  controls.enableDamping = true; // an animation loop is required when damping is enabled
-  controls.dampingFactor = 0.25;
+  getAtomPos(carbon3).x = 10;
 
   kwm_renderer.onUpdate = () => {
     controls.update();
@@ -69,31 +89,27 @@ function main() {
 
   kwm_renderer.animate();
 
-  new KeyHandler()
-    .createKeyMap(
-      new Map()
-        .set([Key.Space1, Key.Space2, Key.Up], () => {
-          kwm_renderer.camera!.position.y += 0.3;
-          atom_helper.selectAtoms(carbon3);
-        })
-        .set(
-          [Key.Shift, Key.Down],
-          () => (kwm_renderer.camera!.position.y -= 0.3)
-        )
-        .set([Key.W], () => (kwm_renderer.camera!.position.z -= 0.3))
-        .set([Key.A], () => (kwm_renderer.camera!.position.x -= 0.3))
-        .set([Key.S], () => (kwm_renderer.camera!.position.z += 0.3))
-        .set([Key.D], () => (kwm_renderer.camera!.position.x += 0.3))
-        .set([Key.Left], () => (kwm_renderer.camera!.rotation.y -= 0.01))
-        .set([Key.Right], () => (kwm_renderer.camera!.rotation.y += 0.01))
-    )
-    .setupKeyListeners();
-
   console.log("Atoms: " + atomsToString(kwm_renderer.atoms));
 
   window.addEventListener("resize", () => {
     kwm_renderer.camera!.aspect = window.innerWidth / window.innerHeight;
     kwm_renderer.camera!.updateProjectionMatrix();
     kwm_renderer.renderer!.setSize(window.innerWidth, window.innerHeight);
+  });
+
+  const add_button = document.getElementById("add-button");
+  add_button?.addEventListener("click", () => {
+    const atom = atom_helper.createAtom({
+      charge: 0,
+      atom_type: AtomType.Carbon,
+    });
+    const last_pos = getAtomPos(
+      kwm_renderer.atoms[kwm_renderer.atoms.length - 2]
+    ).x;
+    console.log(last_pos);
+    getAtomPos(atom).x = last_pos - 10;
+    console.log(
+      "Last: " + getAtomPos(kwm_renderer.atoms[kwm_renderer.atoms.length - 2]).x
+    );
   });
 }

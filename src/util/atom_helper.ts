@@ -86,6 +86,7 @@ export class AtomHelper {
       electron_spheres: [],
       connections: [],
       atom: atom,
+      selected: false
     };
 
     var binding = atom.atom_type.maxElectrons - atom.atom_type.electrons;
